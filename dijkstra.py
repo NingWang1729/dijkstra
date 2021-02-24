@@ -77,7 +77,7 @@ class dijkstra:
         return -1
 
     def show_a_shortest_path(self):
-        stack = self.stack.copy()
+        stack = self.stack
         if len(stack) == 0:
             print("ERROR: FIND PATH FIRST")
             return False
@@ -93,22 +93,33 @@ class dijkstra:
             current_node = stack[len(stack) - 1]
             stack = stack[:-1]
             a_shortest_path.append(current_node)
-            # print("End Node is Node", current_node.name)
+            print("End Node is Node", current_node.name)
             while len(stack) > 0:
+                neighbors = []
+                for neighbor in self.finished_vertices:
+                    current_edge = self.find_corresponding_edge(current_node, neighbor)
+                    if current_edge is not None:
+                        neighbors.append(neighbor)
+                print("Looking at all nodes for neighbors:")
+                for index in range(len(stack)):
+                    print("Looking at Node ", stack[index].name, "...", sep='')
+                    if stack[index] in neighbors:
+                        print("It's the closest neighbor to ", current_node.name, "!", sep='')
+                        current_node = stack[index]
+                        a_shortest_path.append(current_node)
+                        stack = stack[:index]
+                        break;
+
                 # print("Looking at Node ", stack[len(stack) - 1].name, "...", sep='')
-                current_edge = self.find_corresponding_edge(current_node, stack[len(stack) - 1])
-                if current_edge is not None:
-                    # print("It's a node in the path!")
-                    current_node = stack[len(stack) - 1]
-                    a_shortest_path.append(current_node)
-                else:
-                    pass
-                    # print("Not a node in the path!")
-                stack = stack[:-1]
-            print("A possible shortest path is:", end=" ")
-            for node in a_shortest_path[::-1]:
-                print(node.name, end=" ")
-            print("")
+                # if stack[len(stack) - 1] in neighbors:
+                #     print("It's a node in the path!")
+                #     current_node = stack[len(stack) - 1]
+                #     a_shortest_path.append(current_node)
+                # else:
+                #     pass
+                #     print("Not a node in the path!")
+                # stack = stack[:-1]
+            print("A possible shortest path is:", "->".join([node.name for node in a_shortest_path[::-1]]))
 
 
 if __name__ == '__main__':
@@ -166,11 +177,11 @@ if __name__ == '__main__':
     f = node('f')
     g = node('g')
     h = node('h')
-    i = node('j')
-    j = node('k')
+    i = node('i')
+    j = node('j')
     z = node('z')
-    a.set_start()
-    z.set_end()
+    b.set_start()
+    j.set_end()
     vertices = {a, b, c, d, e, f, g, h, i, j, z}
 
     # Edges
@@ -200,6 +211,8 @@ if __name__ == '__main__':
 
     shortest_path = dijkstra(vertices, edges)
     print("Shortest path from start to end is:", shortest_path.find_shortest_path())
+    print("We looked through nodes in order of:", ", ".join([node.name for node in shortest_path.stack]))
+    print()
     shortest_path.show_a_shortest_path()
     # print("Nodes with distances:")
     # shortest_path.display()
