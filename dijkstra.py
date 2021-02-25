@@ -71,12 +71,15 @@ class dijkstra:
 
     def find_shortest_path(self):
         self.relax()
+        print("Shortest path from start to end has length:", end=' ')
         for final_node in self.finished_vertices:
             if final_node.end:
+                print(final_node.distance)
                 return final_node.distance
         return -1
 
     def show_a_shortest_path(self):
+        print("We relaxed nodes in this order:", ", ".join([node.name for node in shortest_path.stack]),end='\n\n')
         stack = self.stack
         if len(stack) == 0:
             print("ERROR: FIND PATH FIRST")
@@ -99,75 +102,19 @@ class dijkstra:
                 for neighbor in self.finished_vertices:
                     current_edge = self.find_corresponding_edge(current_node, neighbor)
                     if current_edge is not None:
-                        neighbors.append(neighbor)
+                        neighbors.append((neighbor, current_edge))
                 print("Looking at all nodes for neighbors:")
-                for index in range(len(stack)):
-                    print("Looking at Node ", stack[index].name, "...", sep='')
-                    if stack[index] in neighbors:
-                        print("It's the closest neighbor to ", current_node.name, "!", sep='')
-                        current_node = stack[index]
-                        a_shortest_path.append(current_node)
-                        stack = stack[:index]
-                        break;
-
-                # print("Looking at Node ", stack[len(stack) - 1].name, "...", sep='')
-                # if stack[len(stack) - 1] in neighbors:
-                #     print("It's a node in the path!")
-                #     current_node = stack[len(stack) - 1]
-                #     a_shortest_path.append(current_node)
-                # else:
-                #     pass
-                #     print("Not a node in the path!")
-                # stack = stack[:-1]
+                # Find the neighbor with least sum of edge distance and distance from start
+                previous_node = min(neighbors, key=lambda x: x[0].distance + x[1].distance)[0]
+                print("Closest neighbor on the way to start is: ", previous_node.name, "!", sep='')
+                index = stack.index(previous_node)
+                current_node = previous_node
+                a_shortest_path.append(current_node)
+                stack = stack[:index]
             print("A possible shortest path is:", "->".join([node.name for node in a_shortest_path[::-1]]))
 
 
 if __name__ == '__main__':
-    # # Sample example:
-    # # Nodes
-    # a = node('a')
-    # b = node('b')
-    # c = node('c')
-    # d = node('d')
-    # e = node('e')
-    # f = node('f')
-    # g = node('g')
-    # z = node('z')
-    # a.set_start()
-    # z.set_end()
-    # vertices = {a, b, c, d, e, f, g, z}
-    #
-    # # Edges
-    # ab = edge(a, b, 2)
-    # af = edge(a, f, 1)
-    # bc = edge(b, c, 2)
-    # bd = edge(b, d, 2)
-    # be = edge(b, e, 4)
-    # ce = edge(c, e, 3)
-    # cz = edge(c, z, 1)
-    # de = edge(d, e, 4)
-    # df = edge(d, f, 3)
-    # eg = edge(e, g, 7)
-    # fg = edge(f, g, 5)
-    # gz = edge(g, z, 6)
-    # edges = {ab, af, bc, bd, be, ce, cz, de, df, eg, fg, gz}
-
-    # a = node('a')
-    # b = node('b')
-    # c = node('c')
-    # d = node('d')
-    # vertices = {a, b, c, d}
-    # a.set_start()
-    # d.set_end()
-    #
-    # ab = edge(a, b, 1)
-    # ac = edge(a, c, 3)
-    # ad = edge(a, d, 4)
-    # bc = edge(b, c, 1)
-    # bd = edge(b, d, 3)
-    # cd = edge(c, d, 1)
-    # edges = {ab, ac, ad, bc, bd, cd}
-
     # Nodes
     a = node('a')
     b = node('b')
@@ -205,14 +152,18 @@ if __name__ == '__main__':
     gj = edge(g, j, 4)
     gz = edge(g, z, 6)
     hi = edge(h, i, 2)
-    ij = edge(i ,j, 6)
+    ij = edge(i, j, 6)
     jz = edge(j, z, 5)
     edges = {ab, ae, ah, bc, be, bf, cd, cf, cg, dg, dz, ef, eh, fg, fh, fi, fj, gj, gz, hi, ij, jz}
 
     shortest_path = dijkstra(vertices, edges)
-    print("Shortest path from start to end is:", shortest_path.find_shortest_path())
-    print("We looked through nodes in order of:", ", ".join([node.name for node in shortest_path.stack]))
-    print()
+
+    # First step is to use dijkstra's algorithm to relax all edges
+    # When we do so, however, we want to push that node onto a stack to save the order
+    shortest_path.find_shortest_path()
+
+    # Work backwards from the end node to the start node
+    # Check each neighbor of the current node to see which one is closest to start by adding its distance to the edge
+    # Make that the node in a shortest path just before the last node.
+    # Repeat until we reach the start node. We now have a shortest path.
     shortest_path.show_a_shortest_path()
-    # print("Nodes with distances:")
-    # shortest_path.display()
